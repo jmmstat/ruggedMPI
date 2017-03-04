@@ -1,0 +1,208 @@
+---
+title: "MPI Category Predictions"
+author: "jmmstat"
+date: "February 27, 2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+```{r}
+rugged <- read.csv("rugged_data.csv",header = TRUE, sep = ",")
+Terrain <- read.csv("Terrain.csv", header = TRUE, stringsAsFactors = FALSE, sep = ",", as.is = TRUE)
+#Change country in rugged to character to agree with the other files.
+rugged$country <- as.character(rugged$country)
+#Get rid of trailing and leading white spaces in the Country variable
+Terrain$Country <- gsub("^\\s+|\\s+$", "", Terrain$Country)
+library(data.table)
+library(ggplot2)
+library(rworldmap)
+library(tm)
+library(dtplyr)
+
+#Now, to change many of the Terrain Country names to agree with mpiCtry
+Terrain$Country[Terrain$Country == "Congo, Republic of the"] <- "Congo, Rep."
+#Terrain$Country[Terrain$Country == "Cyprus"] <- "Cyprus, Northern"
+Terrain$Country[Terrain$Country == "Democratic Republic of the Congo"] <- "Congo, Dem. Rep."
+Terrain$Country[Terrain$Country == "Egypt"] <- "Egypt, Arab Rep."
+Terrain$Country[Terrain$Country == "Faroe Islands"] <- "Faeroe Islands"
+Terrain$Country[Terrain$Country == "Falkland Islands (Islas Malvinas)"] <- "Falkland Islands"
+Terrain$Country[Terrain$Country == "South Korea"] <- "Korea, Rep."
+Terrain$Country[Terrain$Country == "North Korea"] <- "Korea, Dem. Rep."
+Terrain$Country[Terrain$Country == "Laos"] <- "Lao PDR"
+Terrain$Country[Terrain$Country == "Republic of Macedonia"] <- "Macedonia"
+Terrain$Country[Terrain$Country == "Federated States of Micronesia"] <- "Micronesia, Fed. States of"
+Terrain$Country[Terrain$Country == "Burma"] <- "Myanmar"
+Terrain$Country[Terrain$Country == "Netherlands Antilles"] <- "Caribbean Netherlands"
+Terrain$Country[Terrain$Country == "Russia"] <- "Russian Federation"
+Terrain$Country[Terrain$Country == "Slovakia"] <- "Slovak Republic"
+Terrain$Country[Terrain$Country == "Saint Kitts and Nevis"] <- "St. Kitts and Nevis"
+Terrain$Country[Terrain$Country == "Tanzania"] <- "Zanzibar"
+Terrain$Country[Terrain$Country == "United States"] <- "United States of America"
+Terrain$Country[Terrain$Country == "Saint Kitts and Nevis"] <- "St. Kitts and Nevis"
+Terrain$Country[Terrain$Country == "Saint Lucia"] <- "St. Lucia"
+Terrain$Country[Terrain$Country == "Saint Pierre and Miquelon"] <- "St. Pierre and Miquelon"
+Terrain$Country[Terrain$Country == "Saint Vincent and the Grenadines"] <- "St. Vincent and Grenadines"
+Terrain$Country[Terrain$Country == "The Bahamas"] <- "Bahamas"
+Terrain$Country[Terrain$Country == "The Gambia"] <- "Gambia"
+Terrain$Country[Terrain$Country == "East Timor"] <- "Timor-Leste"
+Terrain$Country[Terrain$Country == "Saint Lucia"] <- "St. Lucia"
+Terrain$Country[Terrain$Country == "Svalbard"] <- "Svalbard Islands"
+Terrain$Country[Terrain$Country == "Wallis and Futuna"] <- "Wallis and Futuna Islands"
+
+landlock <- read.table("landlocked.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE)
+landlock$Landlocked[landlock$Landlocked == "Zimbabwe "] <- "Zimbabwe"
+Terrain$landlock <- as.numeric(Terrain$Country %in% landlock$Landlocked)
+
+#Clean up the rugged country names:
+rugged$country[rugged$country == "Brunei Darussalam"] <- "Brunei"
+rugged$country[rugged$country == "Côte d'Ivoire"] <- "Cote d'Ivoire"  
+rugged$country[rugged$country == "Congo"] <- "Congo, Rep." 
+#rugged$country[rugged$country == "Cyprus"] <- "Cyprus, Northern" 
+rugged$country[rugged$country == "Democratic Republic of the Congo"] <- "Congo, Dem. Rep."
+rugged$country[rugged$country == "Falkland Islands (Malvinas)"] <- "Falkland Islands"
+rugged$country[rugged$country == "Egypt"] <- "Egypt, Arab Rep."
+
+rugged$country[rugged$country == "Micronesia, Federated States of"] <- "Micronesia, Fed. States of"
+rugged$country[rugged$country == "United Kingdom of Great Britain and Northern Ireland"] <- "United Kingdom"
+rugged$country[rugged$country == "Hong Kong Special Administrative Region of China"] <- "Hong Kong"
+rugged$country[rugged$country == "Iran, Islamic Republic of"] <- "Iran"
+rugged$country[rugged$country == "Republic of Korea"] <- "Korea, Rep."
+rugged$country[rugged$country == "Lao People's Democratic Republic"] <- "Lao PDR"
+rugged$country[rugged$country == "Libyan Arab Jamahiriya"] <- "Libya"
+rugged$country[rugged$country == "Macao Special Administrative Region of China"] <- "Macau"
+rugged$country[rugged$country == "Republic of Moldova"] <- "Moldova"
+rugged$country[rugged$country == "The former Yugoslav Republic of Macedonia"] <- "Macedonia"
+rugged$country[rugged$country == "Micronesia, Federated States of"] <- "Micronesia, Fed. States of"
+rugged$country[rugged$country == "Netherlands Antilles"] <- "Caribbean Netherlands"
+rugged$country[rugged$country == "Pitcairn"] <- "Pitcairn Islands"
+rugged$country[rugged$country == "Democratic People's Republic of Korea"] <- "Korea, Dem. Rep."
+rugged$country[rugged$country == "Réunion"] <- "Reunion"
+rugged$country[rugged$country == "Saint Kitts and Nevis"] <- "St. Kitts and Nevis"
+rugged$country[rugged$country == "Saint Lucia"] <- "St. Lucia"
+rugged$country[rugged$country == "Saint Pierre and Miquelon"] <- "St. Pierre and Miquelon"
+rugged$country[rugged$country == "Saint Vincent and the Grenadines"] <- "St. Vincent and Grenadines"
+rugged$country[rugged$country == "Slovakia"] <- "Slovak Republic"
+rugged$country[rugged$country == "Svalbard and Jan Mayen Islands"] <- "Svalbard Islands"
+rugged$country[rugged$country == "Syrian Arab Republic"] <- "Syria"
+
+rugged$country[rugged$country == "United Republic of Tanzania"] <- "Zanzibar"
+
+rugged$country[rugged$country == "Holy See"] <- "Holy See (Vatican City)"
+rugged$country[rugged$country == "Venezuela (Bolivarian Republic of)"] <- "Venezuela"
+rugged$country[rugged$country == "Viet Nam"] <- "Vietnam"
+
+#Terrain$Country[!(Terrain$Country %in% rugged$country)]
+```
+   
+```{r}
+load("mpiDatBig.rda")
+mpiCtry <- mpiDatBig[mpiDatBig$location_lvl == 1,c(3,4,9)]
+mpiCtry$Country <- mpiCtry$CountryName
+
+mpiCtry$Country[mpiCtry$Country == "St-BarthÃ©lemy"] <- "Saint Barthelemy"
+mpiCtry$Country[mpiCtry$Country == "CÃ´te d'Ivoire"] <- "Cote d'Ivoire"
+mpiCtry$Country[mpiCtry$Country == "SÃ£o TomÃ© and Principe"] <- "Sao Tome and Principe"
+
+```
+  
+Time to merge the three (four) data sets:
+
+```{r, merge three sets}
+rugged$Country <- rugged$country
+dtm <- merge(Terrain, rugged, by = "Country")
+dtm <- merge(mpiCtry, dtm, by = "Country")
+
+```   
+  
+  
+##Analysis
+  
+  Beginning with removal of NAs.
+   
+```{r}
+dtm2 <- dtm[,c(4,6,10:29,56,57)]
+
+apply(dtm2, 2, function(x) {sum(is.na(x))})
+
+dtm2$final <- dtm2$rgdppc_2000
+mod3 <- lm(rgdppc_2000 ~ rgdppc_2000_m, data = dtm2)
+xrgd <- dtm2$rgdppc_2000_m[which(is.na(dtm2$rgdppc_2000) & !is.na(dtm2$rgdppc_2000_m))]
+xpred <- mod3$coefficients[1] + mod3$coefficients[2]*xrgd
+dtm2$final <- replace(dtm2$final,which(is.na(dtm2$rgdppc_2000) & !is.na(dtm2$rgdppc_2000_m)),xpred)
+```
+  
+  
+Replace NAs in q_rule_law with zeros, the two missing land areas by brute force (gotten by googling), and the five soil NAs (also via googling). 
+
+```{r}
+dtm2$q_rule_law[is.na(dtm2$q_rule_law)] <- 0
+dtm2$land_area[133] <- 197
+dtm2$land_area[188] <- 6102
+dtm2$soil[is.na(dtm2$soil)] <- c(0,0,2,25,0)
+
+```
+
+  
+```{r}
+str(dtm2)
+dtm3 <- dtm2[,c(1:16,22,25)]
+str(dtm3)
+library(rpart)
+library(rpartScore)
+library(rpart.plot)
+tree2 <- rpartScore(MPI_Category~.,data= dtm3)
+rpart.plot(tree2)
+
+tree2pr <- prune(tree2, cp = .02)
+prp(tree2pr, main="Pruned Tree Predicting MPI",
+type=4, fallen=T, branch=.3, round=0, leaf.round=9,
+clip.right.labs=F, under.cex=1.5,
+box.palette="RdYlGn",
+prefix="  MPI  \n", branch.col="gray", branch.lwd=2,
+extra=101, under=T, lt=" < ", ge=" >= ", cex.main=2.5)
+
+rpart.plot(tree2pr,box.palette = "RdYlGn",prefix="  MPI  \n", main="Pruned Tree Predicting MPI")
+```
+   
+Analysis of predictions
+
+   
+Get number and percentage off correct predictions.
+
+```{r}
+
+dtm3$treePredict <- predict(tree2pr)
+(tbpr <- table(dtm3$treePredict,dtm3$MPI_Category))
+sum(diag(tbpr))
+sum(diag(tbpr))/sum(tbpr)*100
+
+
+```
+
+Some multiple classification analysis:
+
+```{r}
+library(homals)
+
+mod1 <- homals(dtm3[,2:18])
+plot(mod1)
+#summary(mod1)
+
+mod2 <- homals(dtm3[,2:18],level="ordinal")
+mod3 <- homals(dtm3[,2:18],level="ordinal",ndim = 3)
+plot(mod2)
+print(mod2)
+#summary(mod2)
+plot(mod3)
+print(mod3)
+#summary(mod3)
+dtm4 <- dtm3[dtm3$final != "NA",]
+mod4 <- homals(dtm4[,1:18], sets = list(2:18,1),level=c(rep("numerical",17),"ordinal"),ndim = 3)
+plot(mod4)
+print(mod4)
+```
