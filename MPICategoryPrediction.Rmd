@@ -106,6 +106,7 @@ mpiCtry$Country <- mpiCtry$CountryName
 
 mpiCtry$Country[mpiCtry$Country == "St-BarthÃ©lemy"] <- "Saint Barthelemy"
 mpiCtry$Country[mpiCtry$Country == "CÃ´te d'Ivoire"] <- "Cote d'Ivoire"
+mpiCtry$Country[mpiCtry$Country == "CuraÃ§ao"] <- "Curacao"
 mpiCtry$Country[mpiCtry$Country == "SÃ£o TomÃ© and Principe"] <- "Sao Tome and Principe"
 
 ```
@@ -205,4 +206,28 @@ dtm4 <- dtm3[dtm3$final != "NA",]
 mod4 <- homals(dtm4[,1:18], sets = list(2:18,1),level=c(rep("numerical",17),"ordinal"),ndim = 3)
 plot(mod4)
 print(mod4)
+```
+
+```{r}
+dtmint <- dtm3[,c("MPI_Category","soil","land_area","lat","tropical","rugged_lsd" ,"near_coast","rugged_popw","final","q_rule_law")]
+mdlm1 <- lm(MPI_Category~.,data=dtmint)
+summary(mdlm1)
+mdlm2 <- lm(MPI_Category~.+.*.,data=dtmint)
+summary(mdlm2)
+#mdstepint <-  step(mdlm2)
+
+dtmintfew <- dtm3[,c("MPI_Category","near_coast","rugged_popw","final","q_rule_law")]
+dtmintfew1 <- dtm3[,c("MPI_Category","land_area","lat","tropical","rugged_lsd" ,"near_coast","rugged_popw","final","q_rule_law")]
+mdlmfew11 <- lm(MPI_Category~.,data=dtmintfew1)
+summary(mdlmfew11)
+mdlmfew21 <- lm(MPI_Category~.+.*.,data=dtmintfew1)
+summary(mdlmfew21)
+#mdstepintfew <-  step(mdlmfew21)
+
+dtmintfew4 <- dtm3[,c("MPI_Category","lat","lon","final","q_rule_law")]
+mdlmfew14 <- lm(MPI_Category~.,data=dtmintfew4)
+summary(mdlmfew14)
+mdlmfew24 <- lm(MPI_Category~.+.*.,data=dtmintfew4)
+summary(mdlmfew24)
+mdstepintfew4 <-  step(mdlmfew24)
 ```
