@@ -53,6 +53,9 @@ Terrain$Country[Terrain$Country == "East Timor"] <- "Timor-Leste"
 Terrain$Country[Terrain$Country == "Saint Lucia"] <- "St. Lucia"
 Terrain$Country[Terrain$Country == "Svalbard"] <- "Svalbard Islands"
 Terrain$Country[Terrain$Country == "Wallis and Futuna"] <- "Wallis and Futuna Islands"
+ 
+# Since our experience in Uganda, I have wondered if that country's landlocked position was
+# a cause of its health woes. So, I got this data from the CIA's World Facts.
 
 landlock <- read.table("landlocked.csv", header = TRUE, sep = ",", stringsAsFactors = FALSE)
 landlock$Landlocked[landlock$Landlocked == "Zimbabwe "] <- "Zimbabwe"
@@ -98,6 +101,9 @@ rugged$country[rugged$country == "Viet Nam"] <- "Vietnam"
 
 #Terrain$Country[!(Terrain$Country %in% rugged$country)]
 ```
+ 
+ Go get the MPI ratings.  
+   
    
 ```{r}
 load("mpiDatBig.rda")
